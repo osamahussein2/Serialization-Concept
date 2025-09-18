@@ -7,15 +7,20 @@ public class Player : MonoBehaviour
     [Header("GameObjects")]
     [SerializeField] private Camera mainCamera;
     [SerializeField] private Text keyPressInstructionText;
+
+    // Organize any canvas related code here
+    [Header("Canvases")]
     public Canvas saveGameCanvas;
+    public Canvas loadGameCanvas;
+    public Canvas pauseGameCanvas;
 
     // Organize any private (shown in inspector) player related parameters here
     [Header("Player Parameters")]
     [SerializeField] private Vector3 initialPosition;
     [SerializeField] private float playerSpeed;
 
-    // Organize any public variables here
-    public Vector3 savedPosition;
+    // Organize any public variables that should be hidden from inspector here
+    [HideInInspector] public Vector3 savedPosition;
 
     // Private parameters
     private bool onTypewriter = false;
@@ -26,6 +31,8 @@ public class Player : MonoBehaviour
         // Initialize game object's active states
         keyPressInstructionText.gameObject.SetActive(false);
         saveGameCanvas.gameObject.SetActive(false);
+        pauseGameCanvas.gameObject.SetActive(false);
+        loadGameCanvas.gameObject.SetActive(false);
 
         // Initialize player position
         transform.position = initialPosition;
@@ -34,8 +41,12 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // The player should only move whenever the save game canvas isn't active yet
-        if (!saveGameCanvas.gameObject.activeInHierarchy)
+        // Call pause game toggle
+        ToggleGamePaused();
+
+        // The player should only move whenever the save game canvas, load game canvas and pause game canvas ARE NOT active
+        if (!saveGameCanvas.gameObject.activeInHierarchy && !loadGameCanvas.gameObject.activeInHierarchy && 
+            !pauseGameCanvas.gameObject.activeInHierarchy)
         {
             HandleMovement();
         }
@@ -43,6 +54,17 @@ public class Player : MonoBehaviour
         // Call the typewriter save logic
         ToggleTypewriterSave();
         TypewriterVisibility();
+    }
+
+    void ToggleGamePaused()
+    {
+        // Check if player presses ESCAPE when the save game canvas, load game canvas and the pause game canvas are all NOT visible
+        if (Input.GetKeyDown(KeyCode.Escape) && !pauseGameCanvas.gameObject.activeInHierarchy && 
+            !saveGameCanvas.gameObject.activeInHierarchy && !loadGameCanvas.gameObject.activeInHierarchy)
+        {
+            // Activate the pause game canvas for pausing the game
+            pauseGameCanvas.gameObject.SetActive(true);
+        }
     }
 
     void HandleMovement()
@@ -60,9 +82,10 @@ public class Player : MonoBehaviour
 
     void ToggleTypewriterSave()
     {
-        // If the key press instruction IS active, space key is pressed and the save game canvas ISN'T active
+        // If the key press instruction IS active, space key is pressed, the save game canvas and pause game canvas ARE NOT active
         if (keyPressInstructionText.gameObject.activeInHierarchy && Input.GetKeyDown(KeyCode.Space) &&
-            !saveGameCanvas.gameObject.activeInHierarchy)
+            !saveGameCanvas.gameObject.activeInHierarchy && !loadGameCanvas.gameObject.activeInHierarchy && 
+            !pauseGameCanvas.gameObject.activeInHierarchy)
         {
             // Go ahead and deactivate key press instruction, but do activate the save game canvas for saving
             keyPressInstructionText.gameObject.SetActive(false);
@@ -107,6 +130,7 @@ public class Player : MonoBehaviour
     {
         PlayerData playerData = SaveSystem.LoadPlayerFile(saveNumber);
 
+        // Load player's position from save file
         savedPosition.x = playerData.savedPosition[0];
         savedPosition.y = playerData.savedPosition[1];
         savedPosition.z = playerData.savedPosition[2];
