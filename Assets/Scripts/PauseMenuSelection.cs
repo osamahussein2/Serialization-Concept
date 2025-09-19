@@ -9,7 +9,7 @@ public class PauseMenuSelection : MonoBehaviour
     private Player player;
 
     // Create private variables here
-    private int slotSelected = 0; // Start at select "Resume" option
+    [HideInInspector] public int slotSelected = 0; // Start at select "Resume" option
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -24,7 +24,7 @@ public class PauseMenuSelection : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Detect ESCAPE key press when pause menu is active
+        // Detect ESCAPE key press when pause menu is active to hide the pause menu
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             // Reset at "Resume" selected option as well
@@ -40,13 +40,13 @@ public class PauseMenuSelection : MonoBehaviour
 
     void SwitchOption()
     {
-        // Go down the selected options
+        // Go up the selected options
         if (Input.GetKeyDown(KeyCode.UpArrow) && slotSelected > 0)
         {
             slotSelected -= 1;
         }
 
-        // Go up the selected options
+        // Go down the selected options
         else if (Input.GetKeyDown(KeyCode.DownArrow) && slotSelected >= 0 && slotSelected < 2)
         {
             slotSelected += 1;

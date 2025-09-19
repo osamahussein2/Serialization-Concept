@@ -37,4 +37,20 @@ public static class SaveSystem
             return null;
         }
     }
+
+    public static bool DoesFileExist(int saveNumber)
+    {
+        string filePath = Application.persistentDataPath + $"/PlayerSave{saveNumber}.txt";
+
+        // Simple check if file does exist
+        if (File.Exists(filePath))
+        {
+            return true;
+        }
+
+        else
+        {
+            return false;
+        }
+    }
 }

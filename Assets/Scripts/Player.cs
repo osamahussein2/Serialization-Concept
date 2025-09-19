@@ -5,7 +5,7 @@ public class Player : MonoBehaviour
 {
     // Organize any game object related code here
     [Header("GameObjects")]
-    [SerializeField] private Camera mainCamera;
+    public Camera mainCamera;
     [SerializeField] private Text keyPressInstructionText;
 
     // Organize any canvas related code here
@@ -18,9 +18,6 @@ public class Player : MonoBehaviour
     [Header("Player Parameters")]
     [SerializeField] private Vector3 initialPosition;
     [SerializeField] private float playerSpeed;
-
-    // Organize any public variables that should be hidden from inspector here
-    [HideInInspector] public Vector3 savedPosition;
 
     // Private parameters
     private bool onTypewriter = false;
@@ -131,11 +128,27 @@ public class Player : MonoBehaviour
         PlayerData playerData = SaveSystem.LoadPlayerFile(saveNumber);
 
         // Load player's position from save file
-        savedPosition.x = playerData.savedPosition[0];
-        savedPosition.y = playerData.savedPosition[1];
-        savedPosition.z = playerData.savedPosition[2];
+        transform.position = new Vector3(playerData.savedPosition[0], playerData.savedPosition[1],
+            playerData.savedPosition[2]);
 
-        transform.position = savedPosition;
+        // Load the camera's position from save file
+        mainCamera.transform.position = new Vector3(playerData.savedCameraPosition[0], 
+            playerData.savedCameraPosition[1], playerData.savedCameraPosition[2]);
+    }
+
+    public bool CheckIfFileExists(int saveNumber)
+    {
+        // Make sure the save file number is valid to return true
+        if (SaveSystem.DoesFileExist(saveNumber))
+        {
+            return true;
+        }
+
+        // Otherwise, save file isn't valid
+        else
+        {
+            return false;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

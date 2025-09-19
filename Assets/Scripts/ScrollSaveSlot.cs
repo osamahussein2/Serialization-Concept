@@ -9,8 +9,8 @@ public class ScrollSaveSlot : MonoBehaviour
     [Header("GameObjects")]
     [SerializeField] private List<Text> saveSlotTexts;
 
-    // Organize any scrolling related variables here
-    [Header("Scrolling Parameters")]
+    // Organize any typewriting related variables here
+    [Header("Handle Typewriting")]
     [SerializeField] private float typeInSeconds = 0.2f;
 
     // Create private game objects here
@@ -21,14 +21,21 @@ public class ScrollSaveSlot : MonoBehaviour
     private int slotSelected = 5; // Start at select slot "Do Not Save"
     private bool typewritingDone = true; // Typewriter check
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    // Initialize any objects and save text files no matter if the object is active or not
+    void Awake()
     {
         // Use the image component found on its own object
         darkRedSlotImage = GetComponent<RawImage>();
 
         // Find the player script inside the Player game object
         player = GameObject.Find("Player").GetComponent<Player>();
+
+        // Make sure to update the save text slots if a save file number if found on awake
+        ValidateSaveFile(0, 1, "Slot 1 - Player Saved 1", "Slot 1 - No Data");
+        ValidateSaveFile(1, 2, "Slot 2 - Player Saved 2", "Slot 2 - No Data");
+        ValidateSaveFile(2, 3, "Slot 3 - Player Saved 3", "Slot 3 - No Data");
+        ValidateSaveFile(3, 4, "Slot 4 - Player Saved 4", "Slot 4 - No Data");
+        ValidateSaveFile(4, 5, "Slot 5 - Player Saved 5", "Slot 5 - No Data");
     }
 
     // Update is called once per frame
@@ -50,13 +57,13 @@ public class ScrollSaveSlot : MonoBehaviour
 
     void SwitchSlots()
     {
-        // Go down the selected slots (make sure typewriting is finished first)
+        // Go up the selected slots (make sure typewriting is finished first)
         if (Input.GetKeyDown(KeyCode.UpArrow) && slotSelected > 0 && typewritingDone)
         {
             slotSelected -= 1;
         }
 
-        // Go up the selected slots (make sure typewriting is finished first)
+        // Go down the selected slots (make sure typewriting is finished first)
         else if (Input.GetKeyDown(KeyCode.DownArrow) && slotSelected >= 0 && slotSelected < 5 && typewritingDone)
         {
             slotSelected += 1;
@@ -69,23 +76,23 @@ public class ScrollSaveSlot : MonoBehaviour
         switch (slotSelected)
         {
             case 0:
-                SaveSlot1();
+                SaveSlot(0, 1, "Slot 1 - Player Saved 1", new Vector2(0.0f, 35.0f));
                 break;
 
             case 1:
-                SaveSlot2();
+                SaveSlot(1, 2, "Slot 2 - Player Saved 2", new Vector2(0.0f, 5.0f));
                 break;
 
             case 2:
-                SaveSlot3();
+                SaveSlot(2, 3, "Slot 3 - Player Saved 3", new Vector2(0.0f, -25.0f));
                 break;
 
             case 3:
-                SaveSlot4();
+                SaveSlot(3, 4, "Slot 4 - Player Saved 4", new Vector2(0.0f, -55.0f));
                 break;
 
             case 4:
-                SaveSlot5();
+                SaveSlot(4, 5, "Slot 5 - Player Saved 5", new Vector2(0.0f, -85.0f));
                 break;
 
             case 5:
@@ -97,113 +104,47 @@ public class ScrollSaveSlot : MonoBehaviour
         }
     }
 
-    void SaveSlot1()
+    void ValidateSaveFile(int textIndex, int saveNumber, string saveValidText, string saveInvalidText)
     {
-        // Position the slot image where the save slot text is
-        if (darkRedSlotImage.rectTransform.anchoredPosition != new Vector2(0.0f, 35.0f))
-            darkRedSlotImage.rectTransform.anchoredPosition = new Vector2(0.0f, 35.0f);
-
-        if (Input.GetKeyDown(KeyCode.Return) && typewritingDone)
+        // Make sure to update save slot texts to valid save files
+        if (player.CheckIfFileExists(saveNumber))
         {
-            //player.PlayerSave(1);
-
-            saveSlotTexts[0].text = "";
-
-            StartCoroutine(TypewriteSaveSlot(0, "Slot 1 - Player Saved 1", typeInSeconds));
-            typewritingDone = false;
+            if (saveSlotTexts[textIndex].text != saveValidText)
+                saveSlotTexts[textIndex].text = saveValidText;
         }
 
-        else if (!typewritingDone && saveSlotTexts[0].text == "Slot 1 - Player Saved 1")
+        // Make sure to update save slot texts to invalid save files
+        else if (!player.CheckIfFileExists(saveNumber))
         {
-            typewritingDone = true;
+            if (saveSlotTexts[textIndex].text != saveInvalidText)
+                saveSlotTexts[textIndex].text = saveInvalidText;
         }
     }
 
-    void SaveSlot2()
+    void SaveSlot(int textIndex, int saveNumber, string saveText, Vector2 slotImagePosition)
     {
         // Position the slot image where the save slot text is
-        if (darkRedSlotImage.rectTransform.anchoredPosition != new Vector2(0.0f, 5.0f))
-            darkRedSlotImage.rectTransform.anchoredPosition = new Vector2(0.0f, 5.0f);
+        if (darkRedSlotImage.rectTransform.anchoredPosition != slotImagePosition)
+            darkRedSlotImage.rectTransform.anchoredPosition = slotImagePosition;
 
+        // Check if the player presses ENTER or RETURN and the typewriting is finished
         if (Input.GetKeyDown(KeyCode.Return) && typewritingDone)
         {
-            //player.PlayerSave(2);
+            // Save game's information using a save number
+            player.PlayerSave(saveNumber);
 
-            saveSlotTexts[1].text = "";
+            // Start save slot text to be empty
+            saveSlotTexts[textIndex].text = "";
 
-            StartCoroutine(TypewriteSaveSlot(1, "Slot 2 - Player Saved 2", typeInSeconds));
+            // Start typewriting the save slot text and set typewriting done to false (disables player input)
+            StartCoroutine(TypewriteSaveSlot(textIndex, saveText, typeInSeconds));
             typewritingDone = false;
         }
 
-        else if (!typewritingDone && saveSlotTexts[1].text == "Slot 2 - Player Saved 2")
+        // Otherwise, if the save slot text does equal to some save text and typewriting is NOT set to done
+        else if (!typewritingDone && saveSlotTexts[textIndex].text == saveText)
         {
-            typewritingDone = true;
-        }
-    }
-
-    void SaveSlot3()
-    {
-        // Position the slot image where the save slot text is
-        if (darkRedSlotImage.rectTransform.anchoredPosition != new Vector2(0.0f, -25.0f))
-            darkRedSlotImage.rectTransform.anchoredPosition = new Vector2(0.0f, -25.0f);
-
-        if (Input.GetKeyDown(KeyCode.Return) && typewritingDone)
-        {
-            //player.PlayerSave(3);
-
-            saveSlotTexts[2].text = "";
-
-            StartCoroutine(TypewriteSaveSlot(2, "Slot 3 - Player Saved 3", typeInSeconds));
-            typewritingDone = false;
-        }
-
-        else if (!typewritingDone && saveSlotTexts[2].text == "Slot 3 - Player Saved 3")
-        {
-            typewritingDone = true;
-        }
-    }
-
-    void SaveSlot4()
-    {
-        // Position the slot image where the save slot text is
-        if (darkRedSlotImage.rectTransform.anchoredPosition != new Vector2(0.0f, -55.0f))
-            darkRedSlotImage.rectTransform.anchoredPosition = new Vector2(0.0f, -55.0f);
-
-        if (Input.GetKeyDown(KeyCode.Return) && typewritingDone)
-        {
-            //player.PlayerSave(4);
-
-            saveSlotTexts[3].text = "";
-
-            StartCoroutine(TypewriteSaveSlot(3, "Slot 4 - Player Saved 4", typeInSeconds));
-            typewritingDone = false;
-        }
-
-        else if (!typewritingDone && saveSlotTexts[3].text == "Slot 4 - Player Saved 4")
-        {
-            typewritingDone = true;
-        }
-    }
-
-    void SaveSlot5()
-    {
-        // Position the slot image where the save slot text is
-        if (darkRedSlotImage.rectTransform.anchoredPosition != new Vector2(0.0f, -85.0f))
-            darkRedSlotImage.rectTransform.anchoredPosition = new Vector2(0.0f, -85.0f);
-
-        if (Input.GetKeyDown(KeyCode.Return) && typewritingDone)
-        {
-            //player.PlayerSave(5);
-
-            saveSlotTexts[4].text = "";
-
-            StartCoroutine(TypewriteSaveSlot(4, "Slot 5 - Player Saved 5", typeInSeconds));
-            typewritingDone = false;
-        }
-
-        else if (!typewritingDone && saveSlotTexts[4].text == "Slot 5 - Player Saved 5")
-        {
-            typewritingDone = true;
+            typewritingDone = true; // Set typewriting to DONE
         }
     }
 
