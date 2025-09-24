@@ -8,6 +8,8 @@ public class Player : MonoBehaviour
     public Camera mainCamera;
     [SerializeField] private Text keyPressInstructionText;
     [SerializeField] private Slider healthBar;
+    public GameObject knife;
+    [SerializeField] private Text knifeKeyPressInstructionText;
 
     // Organize any canvas related code here
     [Header("Canvases")]
@@ -17,6 +19,7 @@ public class Player : MonoBehaviour
 
     // Organize any public variables that are hidden from inspector here
     [HideInInspector] public float playerHealth;
+    [HideInInspector] public bool carryingKnife = false;
 
     // Organize any private (shown in inspector) player related parameters here
     [Header("Player Parameters")]
@@ -28,6 +31,7 @@ public class Player : MonoBehaviour
 
     // Private parameters
     private bool onTypewriter = false;
+    private bool onKnife = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -37,6 +41,7 @@ public class Player : MonoBehaviour
         saveGameCanvas.gameObject.SetActive(false);
         pauseGameCanvas.gameObject.SetActive(false);
         loadGameCanvas.gameObject.SetActive(false);
+        knifeKeyPressInstructionText.gameObject.SetActive(false);
 
         // Initialize player position
         transform.position = initialPosition;
@@ -64,6 +69,11 @@ public class Player : MonoBehaviour
 
         // Allow the player to modify their player by holding key to test if player's health will be saved and loaded
         ModifyPlayerHealth();
+
+        // Update knife
+        PickOrDropKnife();
+        HandleKnife();
+        KnifeVisibility();
     }
 
     void ToggleGamePaused()
@@ -147,6 +157,47 @@ public class Player : MonoBehaviour
         if (healthBar.value != playerHealth) healthBar.value = playerHealth;
     }
 
+    void PickOrDropKnife()
+    {
+        if (Input.GetKeyDown(KeyCode.G) && !carryingKnife && onKnife)
+        {
+            carryingKnife = true;
+        }
+
+        else if (Input.GetKeyDown(KeyCode.G) && carryingKnife)
+        {
+            carryingKnife = false;
+        }
+    }
+
+    void HandleKnife()
+    {
+        if (!carryingKnife)
+        {
+            knife.transform.position = knife.transform.position;
+        }
+
+        else
+        {
+            knife.transform.position = transform.position;
+        }
+    }
+
+    void KnifeVisibility()
+    {
+        // Enable the knife key press instruction after the player is ON the knife
+        if (onKnife && !knifeKeyPressInstructionText.gameObject.activeInHierarchy && !carryingKnife)
+        {
+            knifeKeyPressInstructionText.gameObject.SetActive(true);
+        }
+
+        // Disable the knife key press instruction after the player is no longer on the knife
+        else if (!onKnife && knifeKeyPressInstructionText.gameObject.activeInHierarchy && !carryingKnife || carryingKnife)
+        {
+            knifeKeyPressInstructionText.gameObject.SetActive(false);
+        }
+    }
+
     // Player Save function
     public void PlayerSave(int saveNumber)
     {
@@ -168,6 +219,13 @@ public class Player : MonoBehaviour
 
         // Load the player's health from save file
         playerHealth = playerData.savedPlayerHealth;
+
+        // Load the knife's last position from save file
+        knife.transform.position = new Vector3(playerData.savedKnifePosition[0], 
+            playerData.savedKnifePosition[1], playerData.savedKnifePosition[2]);
+
+        // Load the last carrying knife boolean value from save file
+        carryingKnife = playerData.savedCarriedKnife;
     }
 
     public bool CheckIfFileExists(int saveNumber)
@@ -192,6 +250,11 @@ public class Player : MonoBehaviour
         {
             onTypewriter = true;
         }
+
+        if (collision.gameObject.name == "Knife" && !carryingKnife)
+        {
+            onKnife = true;
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -200,6 +263,11 @@ public class Player : MonoBehaviour
         if (collision.gameObject.name == "Typewriter")
         {
             onTypewriter = false;
+        }
+
+        if (collision.gameObject.name == "Knife" && !carryingKnife)
+        {
+            onKnife = false;
         }
     }
 }

@@ -13,6 +13,9 @@ public class PlayerData
 
     public float savedPlayerHealth;
 
+    public bool savedCarriedKnife;
+    public float[] savedKnifePosition;
+
     // Take in the player data needed for saving and loading
     public PlayerData(Player player)
     {
@@ -21,6 +24,10 @@ public class PlayerData
         savedCameraPosition = new float[3];
 
         savedPlayerHealth = new float();
+
+        savedCarriedKnife = new bool();
+
+        savedKnifePosition = new float[3];
 
         // Set saved position to the player's current position
         savedPosition[0] = player.transform.position.x;
@@ -33,5 +40,12 @@ public class PlayerData
         savedCameraPosition[2] = player.mainCamera.transform.position.z;
 
         savedPlayerHealth = player.playerHealth;
+
+        savedCarriedKnife = player.carryingKnife;
+
+        // Set saved knife position to the knife's current position
+        savedKnifePosition[0] = player.knife.transform.position.x;
+        savedKnifePosition[1] = player.knife.transform.position.y;
+        savedKnifePosition[2] = player.knife.transform.position.z;
     }
 }
