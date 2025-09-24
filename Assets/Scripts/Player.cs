@@ -7,6 +7,7 @@ public class Player : MonoBehaviour
     [Header("GameObjects")]
     public Camera mainCamera;
     [SerializeField] private Text keyPressInstructionText;
+    [SerializeField] private Slider healthBar;
 
     // Organize any canvas related code here
     [Header("Canvases")]
@@ -14,10 +15,16 @@ public class Player : MonoBehaviour
     public Canvas loadGameCanvas;
     public Canvas pauseGameCanvas;
 
+    // Organize any public variables that are hidden from inspector here
+    [HideInInspector] public float playerHealth;
+
     // Organize any private (shown in inspector) player related parameters here
     [Header("Player Parameters")]
     [SerializeField] private Vector3 initialPosition;
     [SerializeField] private float playerSpeed;
+
+    [Tooltip("This determines the speed in which the player's health drains or increases")]
+    [SerializeField] private float playerHealthModifierSpeed;
 
     // Private parameters
     private bool onTypewriter = false;
@@ -33,6 +40,9 @@ public class Player : MonoBehaviour
 
         // Initialize player position
         transform.position = initialPosition;
+
+        // Just set the player health to the health bar's max value
+        playerHealth = healthBar.maxValue;
     }
 
     // Update is called once per frame
@@ -51,6 +61,9 @@ public class Player : MonoBehaviour
         // Call the typewriter save logic
         ToggleTypewriterSave();
         TypewriterVisibility();
+
+        // Allow the player to modify their player by holding key to test if player's health will be saved and loaded
+        ModifyPlayerHealth();
     }
 
     void ToggleGamePaused()
@@ -116,6 +129,24 @@ public class Player : MonoBehaviour
         }
     }
 
+    void ModifyPlayerHealth()
+    {
+        // Decrement player health only if the player's health is greater than 0
+        if (Input.GetKey(KeyCode.K) && playerHealth > 0.0f)
+        {
+            playerHealth -= playerHealthModifierSpeed * Time.deltaTime;
+        }
+
+        // Increment player health only if the player's health is less than the health bar's max health
+        if (Input.GetKey(KeyCode.L) && playerHealth < healthBar.maxValue)
+        {
+            playerHealth += playerHealthModifierSpeed * Time.deltaTime;
+        }
+
+        // Set the health bar value to the player's health value only if it's not set already
+        if (healthBar.value != playerHealth) healthBar.value = playerHealth;
+    }
+
     // Player Save function
     public void PlayerSave(int saveNumber)
     {
@@ -134,6 +165,9 @@ public class Player : MonoBehaviour
         // Load the camera's position from save file
         mainCamera.transform.position = new Vector3(playerData.savedCameraPosition[0], 
             playerData.savedCameraPosition[1], playerData.savedCameraPosition[2]);
+
+        // Load the player's health from save file
+        playerHealth = playerData.savedPlayerHealth;
     }
 
     public bool CheckIfFileExists(int saveNumber)

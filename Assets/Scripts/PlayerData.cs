@@ -11,12 +11,16 @@ public class PlayerData
     public float[] savedPosition;
     public float[] savedCameraPosition;
 
+    public float savedPlayerHealth;
+
     // Take in the player data needed for saving and loading
     public PlayerData(Player player)
     {
         // Create new floating point arrays for player's and camera's saved positions
         savedPosition = new float[3];
         savedCameraPosition = new float[3];
+
+        savedPlayerHealth = new float();
 
         // Set saved position to the player's current position
         savedPosition[0] = player.transform.position.x;
@@ -27,5 +31,7 @@ public class PlayerData
         savedCameraPosition[0] = player.mainCamera.transform.position.x;
         savedCameraPosition[1] = player.mainCamera.transform.position.y;
         savedCameraPosition[2] = player.mainCamera.transform.position.z;
+
+        savedPlayerHealth = player.playerHealth;
     }
 }
