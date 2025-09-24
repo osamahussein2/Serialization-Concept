@@ -1,35 +1,50 @@
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 public static class SaveSystem
 {
     public static void SavePlayerFile(Player player, int saveNumber)
     {
-        BinaryFormatter formatter = new BinaryFormatter();
+        // Initialize file path to save files
         string filePath = Application.persistentDataPath + $"/PlayerSave{saveNumber}.txt";
 
-        FileStream fileStream = new FileStream(filePath, FileMode.Create);
-
+        // Initialize player data for saving player information
         PlayerData playerData = new PlayerData(player);
 
-        formatter.Serialize(fileStream, playerData);
-        fileStream.Close();
+        // Create a new filestream that will create the save file at the file path defined above
+        using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
+        {
+            // Create a writer that will write any saved data into a JSON file including its binary information
+            using (BinaryWriter binaryWriter = new BinaryWriter(fileStream))
+            {
+                // Save player data
+                string saveData = JsonUtility.ToJson(playerData);
+                binaryWriter.Write(saveData);
+            }
+        }
     }
 
     public static PlayerData LoadPlayerFile(int saveNumber)
     {
+        // Initialize file path for loading files
         string filePath = Application.persistentDataPath + $"/PlayerSave{saveNumber}.txt";
 
+        // Make sure the file exists at the file path to load the binary file
         if (File.Exists(filePath))
         {
-            BinaryFormatter formatter = new BinaryFormatter();
-            FileStream fileStream = new FileStream(filePath, FileMode.Open);
+            // Create a new filestream that will open the save file at the file path defined above
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
+            {
+                // Create a writer that will load any saved data from the binary information using JSON writer
+                using (BinaryReader binaryReader = new BinaryReader(fileStream))
+                {
+                    // Load player data
+                    string loadBinary = binaryReader.ReadString();
+                    PlayerData playerData = JsonUtility.FromJson<PlayerData>(loadBinary);
 
-            PlayerData playerData = formatter.Deserialize(fileStream) as PlayerData;
-            fileStream.Close();
-
-            return playerData;
+                    return playerData;
+                }
+            }
         }
 
         else
