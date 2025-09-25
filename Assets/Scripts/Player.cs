@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,8 +9,19 @@ public class Player : MonoBehaviour
     public Camera mainCamera;
     [SerializeField] private Text keyPressInstructionText;
     [SerializeField] private Slider healthBar;
+
+    // Weapon objects
     public GameObject knife;
+    public GameObject pistol;
+
     [SerializeField] private Text knifeKeyPressInstructionText;
+    [SerializeField] private Text pistolKeyPressInstructionText;
+    [SerializeField] private Image currentWeaponImage;
+    public List<Sprite> weaponSprite;
+
+    // Any sprites we want to put in the inspector for weapons
+    [SerializeField] private Sprite knifeSprite;
+    [SerializeField] private Sprite pistolSprite;
 
     // Organize any canvas related code here
     [Header("Canvases")]
@@ -20,6 +32,8 @@ public class Player : MonoBehaviour
     // Organize any public variables that are hidden from inspector here
     [HideInInspector] public float playerHealth;
     [HideInInspector] public bool carryingKnife = false;
+    [HideInInspector] public bool carryingPistol = false;
+    [HideInInspector] public int selectedWeapon = 0;
 
     // Organize any private (shown in inspector) player related parameters here
     [Header("Player Parameters")]
@@ -32,6 +46,7 @@ public class Player : MonoBehaviour
     // Private parameters
     private bool onTypewriter = false;
     private bool onKnife = false;
+    private bool onPistol = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -42,6 +57,7 @@ public class Player : MonoBehaviour
         pauseGameCanvas.gameObject.SetActive(false);
         loadGameCanvas.gameObject.SetActive(false);
         knifeKeyPressInstructionText.gameObject.SetActive(false);
+        pistolKeyPressInstructionText.gameObject.SetActive(false);
 
         // Initialize player position
         transform.position = initialPosition;
@@ -74,6 +90,15 @@ public class Player : MonoBehaviour
         PickOrDropKnife();
         HandleKnife();
         KnifeVisibility();
+
+        // Update pistol
+        PickOrDropPistol();
+        HandlePistol();
+        PistolVisibility();
+
+        // Handle weapons
+        HandleWeapon();
+        SwitchCurrentlyHeldWeapon();
     }
 
     void ToggleGamePaused()
@@ -159,27 +184,37 @@ public class Player : MonoBehaviour
 
     void PickOrDropKnife()
     {
-        if (Input.GetKeyDown(KeyCode.G) && !carryingKnife && onKnife)
+        // Pick up the knife if player is on knife (but not on pistol) and hasn't picked it up yet
+        if (Input.GetKeyDown(KeyCode.G) && !carryingKnife && onKnife && !onPistol)
         {
+            weaponSprite.Add(knifeSprite);
+            selectedWeapon = 1;
+
             carryingKnife = true;
         }
 
-        else if (Input.GetKeyDown(KeyCode.G) && carryingKnife)
+        // Otherwise, drop the knife when the player has it and decides to put it down
+        else if (Input.GetKeyDown(KeyCode.G) && carryingKnife && !onPistol && selectedWeapon == 1)
         {
+            weaponSprite.Remove(knifeSprite);
+            selectedWeapon = 0;
+
             carryingKnife = false;
         }
     }
 
     void HandleKnife()
     {
+        // If the player isn't carrying a knife, set the knife down
         if (!carryingKnife)
         {
-            knife.transform.position = knife.transform.position;
+            if (knife.transform.parent != null) knife.transform.SetParent(null);
         }
 
+        // If the player is carrying a pistol, set it to move with the player
         else
         {
-            knife.transform.position = transform.position;
+            if (knife.transform.parent != transform) knife.transform.SetParent(transform);
         }
     }
 
@@ -192,9 +227,151 @@ public class Player : MonoBehaviour
         }
 
         // Disable the knife key press instruction after the player is no longer on the knife
-        else if (!onKnife && knifeKeyPressInstructionText.gameObject.activeInHierarchy && !carryingKnife || carryingKnife)
+        else if (!onKnife && knifeKeyPressInstructionText.gameObject.activeInHierarchy && !carryingKnife || 
+            carryingKnife)
         {
             knifeKeyPressInstructionText.gameObject.SetActive(false);
+        }
+    }
+
+    void PickOrDropPistol()
+    {
+        // Pick up the pistol if player is on pistol (but not on knife) and hasn't picked it up yet
+        if (Input.GetKeyDown(KeyCode.G) && !carryingPistol && onPistol && !onKnife)
+        {
+            weaponSprite.Add(pistolSprite);
+            selectedWeapon = 1;
+
+            carryingPistol = true;
+        }
+
+        // Otherwise, drop the pistol when the player has it and decides to put it down
+        else if (Input.GetKeyDown(KeyCode.G) && carryingPistol && !onKnife && selectedWeapon == 1)
+        {
+            weaponSprite.Remove(pistolSprite);
+            selectedWeapon = 0;
+
+            carryingPistol = false;
+        }
+    }
+
+    void HandlePistol()
+    {
+        // If the player isn't carrying a pistol, set the pistol down
+        if (!carryingPistol)
+        {
+            if (pistol.transform.parent != null) pistol.transform.SetParent(null);
+        }
+
+        // If the player is carrying a pistol, set it to move with the player
+        else
+        {
+            if (pistol.transform.parent != transform) pistol.transform.SetParent(transform);
+        }
+    }
+
+    void PistolVisibility()
+    {
+        // Enable the pistol key press instruction after the player is ON the pistol
+        if (onPistol && !pistolKeyPressInstructionText.gameObject.activeInHierarchy && !carryingPistol)
+        {
+            pistolKeyPressInstructionText.gameObject.SetActive(true);
+        }
+
+        // Disable the pistol key press instruction after the player is no longer on the pistol
+        else if (!onPistol && pistolKeyPressInstructionText.gameObject.activeInHierarchy && !carryingPistol ||
+            carryingPistol)
+        {
+            pistolKeyPressInstructionText.gameObject.SetActive(false);
+        }
+    }
+
+    void HandleWeapon()
+    {
+        // Set the image UI sprite to the weapon sprite at the selected weapon index
+        if (currentWeaponImage.sprite != weaponSprite[selectedWeapon])
+            currentWeaponImage.sprite = weaponSprite[selectedWeapon];
+
+        switch (selectedWeapon)
+        {
+            case 0:
+
+                // Disable knife and pistol gameobjects if their carried booleans are true
+                if (carryingKnife && knife.activeInHierarchy) knife.SetActive(false);
+                if (carryingPistol && pistol.activeInHierarchy) pistol.SetActive(false);
+
+                break;
+
+            case 1:
+
+                // Enable knife and pistol gameobjects if their carried booleans are true
+                if (carryingKnife && !knife.activeInHierarchy) knife.SetActive(true);
+                if (carryingPistol && !pistol.activeInHierarchy) pistol.SetActive(true);
+
+                break;
+        }
+    }
+
+    void SwitchCurrentlyHeldWeapon()
+    {
+        // Get the last weapon index
+        int finalWeaponIndex = weaponSprite.Count - 1;
+
+        // Switch to previous weapon (only if the weapon sprite count is more than 1)
+        if (Input.GetKeyDown(KeyCode.O) && selectedWeapon > 0 && weaponSprite.Count > 1)
+        {
+            selectedWeapon -= 1;
+        }
+
+        // Switch to next weapon (only if the weapon sprite count is more than 1)
+        if (Input.GetKeyDown(KeyCode.P) && selectedWeapon >= 0 && selectedWeapon < finalWeaponIndex && 
+            weaponSprite.Count > 1)
+        {
+            selectedWeapon += 1;
+        }
+    }
+
+    void LoadKnifeSprite()
+    {
+        // If the player carryKnife saved value is true but the weapon sprite count is 1 or below
+        if (carryingKnife && weaponSprite.Count <= 1)
+        {
+            // Add the knife sprite in the weapon sprite list
+            weaponSprite.Add(knifeSprite);
+        }
+
+        // aOtherwise, if the player carryKnife saved value is false but the weapon sprite count is greater than 1
+        else if (!carryingKnife && weaponSprite.Count > 1)
+        {
+            // Remove the knife sprite from the weapon sprite list
+            weaponSprite.Remove(knifeSprite);
+        }
+    }
+
+    void LoadPistolSprite()
+    {
+        // If the player carryKnife saved value is true but the weapon sprite count is 1 or below
+        if (carryingPistol && weaponSprite.Count <= 1)
+        {
+            // Add the knife sprite in the weapon sprite list
+            weaponSprite.Add(pistolSprite);
+        }
+
+        // Otherwise, if the player carryKnife saved value is false but the weapon sprite count is greater than 1
+        else if (!carryingPistol && weaponSprite.Count > 1)
+        {
+            // Remove the knife sprite from the weapon sprite list
+            weaponSprite.Remove(pistolSprite);
+        }
+
+        /* This needs to be checked again just in case if the player is trying to load a state where they have the 
+        knife, but before loading the game, the player had the pistol with them */
+
+        // If the player carryKnife saved value is true but the weapon sprite count is 1 or below
+        if (carryingKnife && weaponSprite.Count <= 1)
+        {
+            // Add the knife sprite in the weapon sprite list
+            weaponSprite.Add(knifeSprite);
         }
     }
 
@@ -224,8 +401,19 @@ public class Player : MonoBehaviour
         knife.transform.position = new Vector3(playerData.savedKnifePosition[0], 
             playerData.savedKnifePosition[1], playerData.savedKnifePosition[2]);
 
+        // Load the pistol's last position from save file
+        pistol.transform.position = new Vector3(playerData.savedPistolPosition[0],
+            playerData.savedPistolPosition[1], playerData.savedPistolPosition[2]);
+
         // Load the last carrying knife boolean value from save file
         carryingKnife = playerData.savedCarriedKnife;
+        carryingPistol = playerData.savedCarriedPistol;
+
+        // Load the player's selected weapon value
+        selectedWeapon = playerData.savedWeaponIndex;
+
+        LoadKnifeSprite();
+        LoadPistolSprite();
     }
 
     public bool CheckIfFileExists(int saveNumber)
@@ -255,6 +443,11 @@ public class Player : MonoBehaviour
         {
             onKnife = true;
         }
+
+        if (collision.gameObject.name == "Pistol" && !carryingPistol)
+        {
+            onPistol = true;
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -268,6 +461,11 @@ public class Player : MonoBehaviour
         if (collision.gameObject.name == "Knife" && !carryingKnife)
         {
             onKnife = false;
+        }
+
+        if (collision.gameObject.name == "Pistol" && !carryingPistol)
+        {
+            onPistol = false;
         }
     }
 }
