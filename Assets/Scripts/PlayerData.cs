@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Text;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,6 +24,8 @@ public class PlayerData
 
     public float[] savedTriangleColor;
 
+    public string savedTypedTextInGame;
+
     // Take in the player data needed for saving and loading
     public PlayerData(Player player)
     {
@@ -42,6 +45,9 @@ public class PlayerData
 
         savedTriangleColor = new float[4];
 
+        // This saved string variable needs to take in the character array from the type anything text object to save the typed text
+        savedTypedTextInGame = new string(player.typeAnythingInGame.text.ToCharArray());
+
         // Set saved position to the player's current position
         savedPosition[0] = player.transform.position.x;
         savedPosition[1] = player.transform.position.y;
@@ -52,8 +58,10 @@ public class PlayerData
         savedCameraPosition[1] = player.mainCamera.transform.position.y;
         savedCameraPosition[2] = player.mainCamera.transform.position.z;
 
+        // Save player's health
         savedPlayerHealth = player.playerHealth;
 
+        // Save boolean values for carrying knife or pistol
         savedCarriedKnife = player.carryingKnife;
         savedCarriedPistol = player.carryingPistol;
 
@@ -74,5 +82,8 @@ public class PlayerData
         savedTriangleColor[0] = player.triangle.color.r;
         savedTriangleColor[1] = player.triangle.color.g;
         savedTriangleColor[2] = player.triangle.color.b;
+
+        // Set saved typed text in game to whatever the written text was for the in-game text object
+        savedTypedTextInGame = player.typeAnythingInGame.text;
     }
 }

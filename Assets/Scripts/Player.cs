@@ -19,6 +19,9 @@ public class Player : MonoBehaviour
     [SerializeField] private Text knifeKeyPressInstructionText;
     [SerializeField] private Text pistolKeyPressInstructionText;
 
+    // Text object allowing the player to type anything in the inspector
+    public Text typeAnythingInGame;
+
     // Organize any image/sprite object related code here
     [Header("Image/Sprite Objects")]
     [SerializeField] private Image currentWeaponImage;
@@ -444,6 +447,9 @@ public class Player : MonoBehaviour
         // Load the triangle's color from save file
         triangle.color = new Color(playerData.savedTriangleColor[0], playerData.savedTriangleColor[1],
             playerData.savedTriangleColor[2]);
+
+        // Load the saved typed text in-game from the save file
+        typeAnythingInGame.text = playerData.savedTypedTextInGame;
     }
 
     public bool CheckIfFileExists(int saveNumber)
