@@ -21,10 +21,12 @@ public class PlayerData
 
     public int savedWeaponIndex;
 
+    public float[] savedTriangleColor;
+
     // Take in the player data needed for saving and loading
     public PlayerData(Player player)
     {
-        // Create new floating point arrays for player's and camera's saved positions
+        // Create new variables/variable arrays here
         savedPosition = new float[3];
         savedCameraPosition = new float[3];
 
@@ -37,6 +39,8 @@ public class PlayerData
         savedPistolPosition = new float[3];
 
         savedWeaponIndex = new int();
+
+        savedTriangleColor = new float[4];
 
         // Set saved position to the player's current position
         savedPosition[0] = player.transform.position.x;
@@ -65,5 +69,10 @@ public class PlayerData
 
         // Set saved weapon index to the player's selected weapon index
         savedWeaponIndex = player.selectedWeapon;
+
+        // Set saved triangle color to the triangle's current color
+        savedTriangleColor[0] = player.triangle.color.r;
+        savedTriangleColor[1] = player.triangle.color.g;
+        savedTriangleColor[2] = player.triangle.color.b;
     }
 }

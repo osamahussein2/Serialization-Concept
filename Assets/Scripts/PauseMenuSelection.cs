@@ -4,9 +4,12 @@ using UnityEngine.UI;
 
 public class PauseMenuSelection : MonoBehaviour
 {
+    // Organize any game object related code here (shown in inspector)
+    [Header("GameObjects")]
+    [SerializeField] private Player player;
+
     // Create private game objects here
     private RawImage darkRedPauseSelectionImage;
-    private Player player;
 
     // Create private variables here
     [HideInInspector] public int slotSelected = 0; // Start at select "Resume" option
@@ -16,9 +19,6 @@ public class PauseMenuSelection : MonoBehaviour
     {
         // Use the image component found on its own object
         darkRedPauseSelectionImage = GetComponent<RawImage>();
-
-        // Find the player script inside the Player game object
-        player = GameObject.Find("Player").GetComponent<Player>();
     }
 
     // Update is called once per frame

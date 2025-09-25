@@ -7,11 +7,11 @@ public class ScrollLoadSlot : MonoBehaviour
     // Organize any game object related code here
     [Header("GameObjects")]
     [SerializeField] private List<Text> loadSlotTexts;
+    [SerializeField] private Player player;
+    [SerializeField] private PauseMenuSelection pauseMenuScript;
 
     // Create private game objects here
     private RawImage darkRedLoadSlotImage;
-    private Player player;
-    private PauseMenuSelection pauseMenuScript;
 
     // Create private variables here
     private int slotSelected = 5; // Start at select slot "Back"
@@ -21,12 +21,6 @@ public class ScrollLoadSlot : MonoBehaviour
     {
         // Use the image component found on its own object
         darkRedLoadSlotImage = GetComponent<RawImage>();
-
-        // Find the player script inside the Player game object
-        player = GameObject.Find("Player").GetComponent<Player>();
-
-        // Find the pause menu script inside the pause selection image object
-        pauseMenuScript = GameObject.Find("DarkRedPauseSelectionImage").GetComponent<PauseMenuSelection>();
 
         // Make sure to update the load text slots if a save file number if found on awake
         ValidateLoadFile(0, 1, "Slot 1 - Player Saved 1", "Slot 1 - No Data");

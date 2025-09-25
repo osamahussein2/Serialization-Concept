@@ -14,10 +14,18 @@ public class Player : MonoBehaviour
     public GameObject knife;
     public GameObject pistol;
 
+    // Organize any text object related code here
+    [Header("Text Objects")]
     [SerializeField] private Text knifeKeyPressInstructionText;
     [SerializeField] private Text pistolKeyPressInstructionText;
+
+    // Organize any image/sprite object related code here
+    [Header("Image/Sprite Objects")]
     [SerializeField] private Image currentWeaponImage;
     public List<Sprite> weaponSprite;
+
+    // Gives the player ability to change the color of the triangle
+    public SpriteRenderer triangle;
 
     // Any sprites we want to put in the inspector for weapons
     [SerializeField] private Sprite knifeSprite;
@@ -79,6 +87,9 @@ public class Player : MonoBehaviour
             HandleMovement();
         }
 
+        // Get input to change triangle color
+        ChangeTriangleColor();
+
         // Call the typewriter save logic
         ToggleTypewriterSave();
         TypewriterVisibility();
@@ -123,6 +134,21 @@ public class Player : MonoBehaviour
 
         transform.Translate(new Vector3(horizontal * playerSpeed * Time.deltaTime,
             vertical * playerSpeed * Time.deltaTime, 0.0f));
+    }
+
+    void ChangeTriangleColor()
+    {
+        // Press T to change triangle's color only when the save game canvas, load game canvas and the pause game canvas are all NOT visible
+        if (Input.GetKeyDown(KeyCode.T) && !pauseGameCanvas.gameObject.activeInHierarchy &&
+            !saveGameCanvas.gameObject.activeInHierarchy && !loadGameCanvas.gameObject.activeInHierarchy)
+        {
+            // Create local variables exclusively inside this block to change the color of the triangle
+            float randomRed = Random.Range(0.0f, 1.0f), 
+                randomGreen = Random.Range(0.0f, 1.0f), 
+                randomBlue = Random.Range(0.0f, 1.0f);
+
+            triangle.color = new Color(randomRed, randomGreen, randomBlue);
+        }
     }
 
     void ToggleTypewriterSave()
@@ -414,6 +440,10 @@ public class Player : MonoBehaviour
 
         LoadKnifeSprite();
         LoadPistolSprite();
+
+        // Load the triangle's color from save file
+        triangle.color = new Color(playerData.savedTriangleColor[0], playerData.savedTriangleColor[1],
+            playerData.savedTriangleColor[2]);
     }
 
     public bool CheckIfFileExists(int saveNumber)

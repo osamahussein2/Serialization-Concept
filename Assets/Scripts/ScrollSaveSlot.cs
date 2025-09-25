@@ -8,6 +8,7 @@ public class ScrollSaveSlot : MonoBehaviour
     // Organize any game object related code here
     [Header("GameObjects")]
     [SerializeField] private List<Text> saveSlotTexts;
+    [SerializeField] private Player player;
 
     // Organize any typewriting related variables here
     [Header("Handle Typewriting")]
@@ -15,7 +16,6 @@ public class ScrollSaveSlot : MonoBehaviour
 
     // Create private game objects here
     private RawImage darkRedSlotImage;
-    private Player player;
 
     // Create private variables here
     private int slotSelected = 5; // Start at select slot "Do Not Save"
@@ -26,9 +26,6 @@ public class ScrollSaveSlot : MonoBehaviour
     {
         // Use the image component found on its own object
         darkRedSlotImage = GetComponent<RawImage>();
-
-        // Find the player script inside the Player game object
-        player = GameObject.Find("Player").GetComponent<Player>();
 
         // Make sure to update the save text slots if a save file number if found on awake
         ValidateSaveFile(0, 1, "Slot 1 - Player Saved 1", "Slot 1 - No Data");
