@@ -26,6 +26,9 @@ public class PlayerData
 
     public string savedTypedTextInGame;
 
+    public int knifeNumber;
+    public int pistolNumber;
+
     // Take in the player data needed for saving and loading
     public PlayerData(Player player)
     {
@@ -38,8 +41,8 @@ public class PlayerData
         savedCarriedKnife = new bool();
         savedCarriedPistol = new bool();
 
-        savedKnifePosition = new float[3];
-        savedPistolPosition = new float[3];
+        savedKnifePosition = new float[3 * player.knives.Count];
+        savedPistolPosition = new float[3 * player.pistols.Count];
 
         savedWeaponIndex = new int();
 
@@ -48,6 +51,9 @@ public class PlayerData
         // This saved string variable needs to take in the character array from the type anything text object to save the typed text
         savedTypedTextInGame = new string(player.typeAnythingInGame.text.ToCharArray());
 
+        knifeNumber = new int();
+        pistolNumber = new int();
+        
         // Set saved position to the player's current position
         savedPosition[0] = player.transform.position.x;
         savedPosition[1] = player.transform.position.y;
@@ -65,15 +71,11 @@ public class PlayerData
         savedCarriedKnife = player.carryingKnife;
         savedCarriedPistol = player.carryingPistol;
 
-        // Set saved knife position to the knife's current position
-        savedKnifePosition[0] = player.knife.transform.position.x;
-        savedKnifePosition[1] = player.knife.transform.position.y;
-        savedKnifePosition[2] = player.knife.transform.position.z;
+        // Save the current knife/pistol number the player is currently holding
+        knifeNumber = player.knifeNumber;
+        pistolNumber = player.pistolNumber;
 
-        // Set saved pistol position to the pistol's current position
-        savedPistolPosition[0] = player.pistol.transform.position.x;
-        savedPistolPosition[1] = player.pistol.transform.position.y;
-        savedPistolPosition[2] = player.pistol.transform.position.z;
+        SaveWeaponsPositions(player);
 
         // Set saved weapon index to the player's selected weapon index
         savedWeaponIndex = player.selectedWeapon;
@@ -85,5 +87,26 @@ public class PlayerData
 
         // Set saved typed text in game to whatever the written text was for the in-game text object
         savedTypedTextInGame = player.typeAnythingInGame.text;
+    }
+
+    private void SaveWeaponsPositions(Player player)
+    {
+        // Set saved knife position to the knife's current position
+        savedKnifePosition[0] = player.knives[0].transform.position.x;
+        savedKnifePosition[1] = player.knives[0].transform.position.y;
+        savedKnifePosition[2] = player.knives[0].transform.position.z;
+
+        savedKnifePosition[3] = player.knives[1].transform.position.x;
+        savedKnifePosition[4] = player.knives[1].transform.position.y;
+        savedKnifePosition[5] = player.knives[1].transform.position.z;
+
+        // Set saved pistol position to the pistol's current position
+        savedPistolPosition[0] = player.pistols[0].transform.position.x;
+        savedPistolPosition[1] = player.pistols[0].transform.position.y;
+        savedPistolPosition[2] = player.pistols[0].transform.position.z;
+
+        savedPistolPosition[3] = player.pistols[1].transform.position.x;
+        savedPistolPosition[4] = player.pistols[1].transform.position.y;
+        savedPistolPosition[5] = player.pistols[1].transform.position.z;
     }
 }

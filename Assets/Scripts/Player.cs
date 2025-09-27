@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,13 +12,13 @@ public class Player : MonoBehaviour
     [SerializeField] private Slider healthBar;
 
     // Weapon objects
-    public GameObject knife;
-    public GameObject pistol;
+    public List<GameObject> knives;
+    public List<GameObject> pistols;
 
     // Organize any text object related code here
     [Header("Text Objects")]
-    [SerializeField] private Text knifeKeyPressInstructionText;
-    [SerializeField] private Text pistolKeyPressInstructionText;
+    [SerializeField] private List<Text> knifeKeyPressInstructionTexts;
+    [SerializeField] private List<Text> pistolKeyPressInstructionTexts;
 
     // Text object allowing the player to type anything in the inspector
     public Text typeAnythingInGame;
@@ -45,6 +46,8 @@ public class Player : MonoBehaviour
     [HideInInspector] public bool carryingKnife = false;
     [HideInInspector] public bool carryingPistol = false;
     [HideInInspector] public int selectedWeapon = 0;
+    [HideInInspector] public int knifeNumber = 0;
+    [HideInInspector] public int pistolNumber = 0;
 
     // Organize any private (shown in inspector) player related parameters here
     [Header("Player Parameters")]
@@ -67,8 +70,9 @@ public class Player : MonoBehaviour
         saveGameCanvas.gameObject.SetActive(false);
         pauseGameCanvas.gameObject.SetActive(false);
         loadGameCanvas.gameObject.SetActive(false);
-        knifeKeyPressInstructionText.gameObject.SetActive(false);
-        pistolKeyPressInstructionText.gameObject.SetActive(false);
+
+        foreach (Text knifeKeyText in knifeKeyPressInstructionTexts) knifeKeyText.gameObject.SetActive(false);
+        foreach (Text pistolKeyText in pistolKeyPressInstructionTexts) pistolKeyText.gameObject.SetActive(false);
 
         // Initialize player position
         transform.position = initialPosition;
@@ -237,29 +241,30 @@ public class Player : MonoBehaviour
         // If the player isn't carrying a knife, set the knife down
         if (!carryingKnife)
         {
-            if (knife.transform.parent != null) knife.transform.SetParent(null);
+            if (knives[knifeNumber].transform.parent != null) knives[knifeNumber].transform.SetParent(null);
         }
 
         // If the player is carrying a pistol, set it to move with the player
         else
         {
-            if (knife.transform.parent != transform) knife.transform.SetParent(transform);
+            if (knives[knifeNumber].transform.parent != transform)
+                knives[knifeNumber].transform.SetParent(transform);
         }
     }
 
     void KnifeVisibility()
     {
         // Enable the knife key press instruction after the player is ON the knife
-        if (onKnife && !knifeKeyPressInstructionText.gameObject.activeInHierarchy && !carryingKnife)
+        if (onKnife && !knifeKeyPressInstructionTexts[knifeNumber].gameObject.activeInHierarchy && !carryingKnife)
         {
-            knifeKeyPressInstructionText.gameObject.SetActive(true);
+            knifeKeyPressInstructionTexts[knifeNumber].gameObject.SetActive(true);
         }
 
         // Disable the knife key press instruction after the player is no longer on the knife
-        else if (!onKnife && knifeKeyPressInstructionText.gameObject.activeInHierarchy && !carryingKnife || 
-            carryingKnife)
+        else if (!onKnife && knifeKeyPressInstructionTexts[knifeNumber].gameObject.activeInHierarchy &&
+            !carryingKnife || carryingKnife)
         {
-            knifeKeyPressInstructionText.gameObject.SetActive(false);
+            knifeKeyPressInstructionTexts[knifeNumber].gameObject.SetActive(false);
         }
     }
 
@@ -289,29 +294,31 @@ public class Player : MonoBehaviour
         // If the player isn't carrying a pistol, set the pistol down
         if (!carryingPistol)
         {
-            if (pistol.transform.parent != null) pistol.transform.SetParent(null);
+            if (pistols[pistolNumber].transform.parent != null) pistols[pistolNumber].transform.SetParent(null);
         }
 
         // If the player is carrying a pistol, set it to move with the player
         else
         {
-            if (pistol.transform.parent != transform) pistol.transform.SetParent(transform);
+            if (pistols[pistolNumber].transform.parent != transform) 
+                pistols[pistolNumber].transform.SetParent(transform);
         }
     }
 
     void PistolVisibility()
     {
         // Enable the pistol key press instruction after the player is ON the pistol
-        if (onPistol && !pistolKeyPressInstructionText.gameObject.activeInHierarchy && !carryingPistol)
+        if (onPistol && !pistolKeyPressInstructionTexts[pistolNumber].gameObject.activeInHierarchy &&
+            !carryingPistol)
         {
-            pistolKeyPressInstructionText.gameObject.SetActive(true);
+            pistolKeyPressInstructionTexts[pistolNumber].gameObject.SetActive(true);
         }
 
         // Disable the pistol key press instruction after the player is no longer on the pistol
-        else if (!onPistol && pistolKeyPressInstructionText.gameObject.activeInHierarchy && !carryingPistol ||
-            carryingPistol)
+        else if (!onPistol && pistolKeyPressInstructionTexts[pistolNumber].gameObject.activeInHierarchy &&
+            !carryingPistol || carryingPistol)
         {
-            pistolKeyPressInstructionText.gameObject.SetActive(false);
+            pistolKeyPressInstructionTexts[pistolNumber].gameObject.SetActive(false);
         }
     }
 
@@ -325,17 +332,17 @@ public class Player : MonoBehaviour
         {
             case 0:
 
-                // Disable knife and pistol gameobjects if their carried booleans are true
-                if (carryingKnife && knife.activeInHierarchy) knife.SetActive(false);
-                if (carryingPistol && pistol.activeInHierarchy) pistol.SetActive(false);
+                // Disable current knife and pistol gameobjects if their carried booleans are true
+                if (carryingKnife && knives[knifeNumber].activeInHierarchy) knives[knifeNumber].SetActive(false);
+                if (carryingPistol && pistols[pistolNumber].activeInHierarchy) pistols[pistolNumber].SetActive(false);
 
                 break;
 
             case 1:
 
-                // Enable knife and pistol gameobjects if their carried booleans are true
-                if (carryingKnife && !knife.activeInHierarchy) knife.SetActive(true);
-                if (carryingPistol && !pistol.activeInHierarchy) pistol.SetActive(true);
+                // Enable current knife and pistol gameobjects if their carried booleans are true
+                if (carryingKnife && !knives[knifeNumber].activeInHierarchy) knives[knifeNumber].SetActive(true);
+                if (carryingPistol && !pistols[pistolNumber].activeInHierarchy) pistols[pistolNumber].SetActive(true);
 
                 break;
         }
@@ -362,6 +369,44 @@ public class Player : MonoBehaviour
 
     void LoadKnifeSprite()
     {
+        /* Only check if player is carrying knife to change all weapon object's parents depending on whatever the 
+        object is originally parented to before loading */
+        if (carryingKnife)
+        {
+            switch (knifeNumber)
+            {
+                case 0:
+
+                    // Detach the other knife number from the player
+                    if (knives[1].transform.parent != null) knives[1].transform.SetParent(null);
+
+                    // Only attach the knife number we need to the player
+                    if (knives[knifeNumber].transform.parent != transform)
+                        knives[knifeNumber].transform.SetParent(transform);
+
+                    // Only detach the pistol from the player if the loaded state has player carrying knife
+                    foreach (GameObject pistol in pistols)
+                        if (pistol.transform.transform.parent != null) pistol.transform.SetParent(null);
+
+                    break;
+
+                case 1:
+
+                    // Detach the other knife number from the player
+                    if (knives[0].transform.parent != null) knives[0].transform.SetParent(null);
+
+                    // Only attach the knife number we need to the player
+                    if (knives[knifeNumber].transform.parent != transform)
+                        knives[knifeNumber].transform.SetParent(transform);
+
+                    // Only detach the pistol from the player if the loaded state has player carrying knife
+                    foreach (GameObject pistol in pistols)
+                        if (pistol.transform.transform.parent != null) pistol.transform.SetParent(null);
+
+                    break;
+            }
+        }
+
         // If the player carryKnife saved value is true but the weapon sprite count is 1 or below
         if (carryingKnife && weaponSprite.Count <= 1)
         {
@@ -379,6 +424,44 @@ public class Player : MonoBehaviour
 
     void LoadPistolSprite()
     {
+        /* Only check if player is carrying pistol to change all weapon object's parents depending on whatever the 
+        object is originally parented to before loading */
+        if (carryingPistol)
+        {
+            switch (pistolNumber)
+            {
+                case 0:
+
+                    // Detach the other pistol number from the player
+                    if (pistols[1].transform.parent != null) pistols[1].transform.SetParent(null);
+
+                    // Only attach the pistol number we need to the player
+                    if (pistols[pistolNumber].transform.parent != transform)
+                        pistols[pistolNumber].transform.SetParent(transform);
+
+                    // Only detach the knife from the player if the loaded state has player carrying pistol
+                    foreach (GameObject knife in knives)
+                        if (knife.transform.transform.parent != null) knife.transform.SetParent(null);
+
+                    break;
+
+                case 1:
+
+                    // Detach the other pistol number from the player
+                    if (pistols[0].transform.parent != null) pistols[0].transform.SetParent(null);
+
+                    // Only attach the pistol number we need to the player
+                    if (pistols[pistolNumber].transform.parent != transform)
+                        pistols[pistolNumber].transform.SetParent(transform);
+
+                    // Only detach the knife from the player if the loaded state has player carrying pistol
+                    foreach (GameObject knife in knives)
+                        if (knife.transform.transform.parent != null) knife.transform.SetParent(null);
+
+                    break;
+            }
+        }
+
         // If the player carryKnife saved value is true but the weapon sprite count is 1 or below
         if (carryingPistol && weaponSprite.Count <= 1)
         {
@@ -426,17 +509,29 @@ public class Player : MonoBehaviour
         // Load the player's health from save file
         playerHealth = playerData.savedPlayerHealth;
 
-        // Load the knife's last position from save file
-        knife.transform.position = new Vector3(playerData.savedKnifePosition[0], 
-            playerData.savedKnifePosition[1], playerData.savedKnifePosition[2]);
-
-        // Load the pistol's last position from save file
-        pistol.transform.position = new Vector3(playerData.savedPistolPosition[0],
-            playerData.savedPistolPosition[1], playerData.savedPistolPosition[2]);
-
         // Load the last carrying knife boolean value from save file
         carryingKnife = playerData.savedCarriedKnife;
         carryingPistol = playerData.savedCarriedPistol;
+
+        // Make sure to load the correct knife and pistol numbers to assign them as a child of the player
+        knifeNumber = playerData.knifeNumber;
+        pistolNumber = playerData.pistolNumber;
+
+        // Load the 1st knife last position from save file
+        knives[0].transform.position = new Vector3(playerData.savedKnifePosition[0],
+            playerData.savedKnifePosition[1], playerData.savedKnifePosition[2]);
+
+        // Load the 2nd knife last position from save file
+        knives[1].transform.position = new Vector3(playerData.savedKnifePosition[3],
+            playerData.savedKnifePosition[4], playerData.savedKnifePosition[5]);
+
+        // Load the 1st pistol last position from save file
+        pistols[0].transform.position = new Vector3(playerData.savedPistolPosition[0],
+            playerData.savedPistolPosition[1], playerData.savedPistolPosition[2]);
+
+        // Load the 2nd pistol last position from save file
+        pistols[1].transform.position = new Vector3(playerData.savedPistolPosition[3],
+            playerData.savedPistolPosition[4], playerData.savedPistolPosition[5]);
 
         // Load the player's selected weapon value
         selectedWeapon = playerData.savedWeaponIndex;
@@ -475,14 +570,24 @@ public class Player : MonoBehaviour
             onTypewriter = true;
         }
 
-        if (collision.gameObject.name == "Knife" && !carryingKnife)
+        // For every knife the player is inside of, set it to the correct knife number to show the key press instruction
+        for (int i = 0; i < knives.Count; i++)
         {
-            onKnife = true;
+            if (collision.gameObject.name == knives[i].name && !carryingKnife)
+            {
+                knifeNumber = i;
+                onKnife = true;
+            }
         }
 
-        if (collision.gameObject.name == "Pistol" && !carryingPistol)
+        // For every pistol the player is inside of, set it to the correct pistol number to show the key press instruction
+        for (int i = 0; i < pistols.Count; i++)
         {
-            onPistol = true;
+            if (collision.gameObject.name == pistols[i].name && !carryingPistol)
+            {
+                pistolNumber = i;
+                onPistol = true;
+            }
         }
     }
 
@@ -494,14 +599,34 @@ public class Player : MonoBehaviour
             onTypewriter = false;
         }
 
-        if (collision.gameObject.name == "Knife" && !carryingKnife)
+        // Without this if statement, Unity will print an error in console after quitting game
+        if (!knives[0].IsDestroyed() && !knives[1].IsDestroyed())
         {
-            onKnife = false;
+            /* For every knife the player is outside of, set it to the correct knife number to hide the key press
+            instruction */
+            for (int i = 0; i < knives.Count; i++)
+            {
+                if (collision.gameObject.name == knives[i].name && !carryingKnife)
+                {
+                    knifeNumber = i;
+                    onKnife = false;
+                }
+            }
         }
 
-        if (collision.gameObject.name == "Pistol" && !carryingPistol)
+        // Without this if statement, Unity will print an error in console after quitting game
+        if (!pistols[0].IsDestroyed() && !pistols[1].IsDestroyed())
         {
-            onPistol = false;
+            /* For every pistol the player is outside of, set it to the correct pistol number to hide the key press
+            instruction */
+            for (int i = 0; i < pistols.Count; i++)
+            {
+                if (collision.gameObject.name == pistols[i].name && !carryingPistol)
+                {
+                    pistolNumber = i;
+                    onPistol = false;
+                }
+            }
         }
     }
 }
